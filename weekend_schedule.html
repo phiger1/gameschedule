@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekend Game Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cooper: #2563eb;
+    --jackson: #dc2626;
+    --chloe: #16a34a;
+    --page-bg: #ffffff;
+    --card-bg: #ffffff;
+    --border: #e2e4e8;
+    --text: #111111;
+    --muted: #6b7280;
+    --info-bg: #eff6ff;
+    --info-border: #93c5fd;
+    --info-text: #1e3a5f;
+  }
+  body {
+    background: var(--page-bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    padding: 32px 16px 60px;
+  }
+
+  header { text-align: center; margin-bottom: 6px; }
+  header h1 {
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    font-weight: 900;
+    color: #111;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  header p { margin-top: 6px; color: var(--muted); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+
+  .base {
+    max-width: 840px;
+    margin: 18px auto 26px;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    color: var(--info-text);
+    font-weight: 500;
+  }
+
+  .legend {
+    max-width: 840px;
+    margin: 0 auto 22px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+  .dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+
+  .weekend { max-width: 840px; margin: 0 auto 40px; }
+
+  .day-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    border-bottom: 2px solid #d1d5db;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .games { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+
+  .game-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--accent, #ccc);
+    border-radius: 7px;
+    padding: 14px 16px 14px 18px;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .cooper  { --accent: var(--cooper); }
+  .jackson { --accent: var(--jackson); }
+  .chloe   { --accent: var(--chloe); }
+
+  .kid {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #111;
+    line-height: 1.2;
+  }
+  .kid small {
+    display: block;
+    font-size: 0.58rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .team {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111;
+    line-height: 1.2;
+  }
+  .venue { font-size: 0.72rem; color: var(--muted); margin-top: 3px; font-weight: 400; }
+  .venue::before { content: '📍 '; }
+  .venue a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+  }
+  .venue a:hover { color: #111; border-bottom-color: #111; }
+  .kick-line { font-size: 0.72rem; color: #444; margin-top: 5px; font-weight: 400; }
+  .kick-line strong { font-weight: 700; color: #111; }
+
+  .kit-reminder {
+    margin-top: 7px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-radius: 3px;
+    padding: 3px 9px;
+    font-size: 0.65rem;
+    color: var(--info-text);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .leave-block { text-align: right; min-width: 108px; }
+  .leave-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; }
+  .leave-time {
+    font-size: 1.7rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #111;
+    letter-spacing: -0.02em;
+  }
+  .leave-from { font-size: 0.58rem; color: var(--muted); margin-top: 2px; font-style: italic; }
+  .leave-drive { font-size: 0.6rem; color: var(--muted); margin-top: 1px; font-weight: 500; }
+
+  .banner {
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.76rem;
+    margin-top: 6px;
+    line-height: 1.6;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    color: var(--info-text);
+    font-weight: 400;
+  }
+  .banner.kit { background: var(--info-bg); border-color: var(--info-border); color: var(--info-text); }
+  .banner strong { font-weight: 700; color: var(--info-text); }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    max-width: 840px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (max-width: 520px) {
+    .game-card { grid-template-columns: 70px 1fr; }
+    .leave-block { grid-column: 2; text-align: left; margin-top: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Weekend Game Day</h1>
+  <p>Cooper · Jackson · Chloe</p>
+</header>
+
+<div class="base">
+  🏠 <strong>Base:</strong> 29 Quirk St, Dee Why &nbsp;·&nbsp; Leave times include a 5 min buffer on top of drive time.
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:var(--cooper)"></div> Cooper</div>
+  <div class="legend-item"><div class="dot" style="background:var(--jackson)"></div> Jackson</div>
+  <div class="legend-item"><div class="dot" style="background:var(--chloe)"></div> Chloe</div>
+  <div class="legend-item"><div class="dot" style="background:var(--orange)"></div> Leave time</div>
+</div>
+
+<!-- SATURDAY -->
+<div class="weekend">
+  <div class="day-label">Saturday <em>—</em> 4 games, 3 kids</div>
+  <div class="games">
+
+    <div class="game-card cooper">
+      <div class="kid">Cooper<small>Game 1 of 2</small></div>
+      <div class="info">
+        <div class="team">Harbord Devils</div>
+        <div class="venue"><a href="https://maps.google.com/?q=Harbord+Park,+Waratah+St,+Freshwater+NSW" target="_blank">Harbord Park, Waratah St, Freshwater</a></div>
+        <div class="kick-line">Arrive 11:00am &nbsp;·&nbsp; Kickoff <strong>12:00pm</strong></div>
+      </div>
+      <div class="leave-block">
+        <div class="leave-label">Leave by</div>
+        <div class="leave-time">10:45</div>
+        <div class="leave-from">from home</div>
+        <div class="leave-drive">~8 min drive</div>
+      </div>
+    </div>
+
+    <div class="game-card jackson">
+      <div class="kid">Jackson<small>Game 1 of 2</small></div>
+      <div class="info">
+        <div class="team">Saints at Riverview</div>
+        <div class="venue"><a href="https://maps.google.com/?q=115+Tambourine+Bay+Rd,+Lane+Cove+NSW+2066" target="_blank">St Ignatius College, 115 Tambourine Bay Rd, Lane Cove</a></div>
+        <div class="kick-line">Arrive 11:00am &nbsp;·&nbsp; Kickoff <strong>12:00pm</strong></div>
+        <div class="kit-reminder">🎽 Pack Harbord Devils kit — going straight to next game</div>
+      </div>
+      <div class="leave-block">
+        <div class="leave-label">Leave by</div>
+        <div class="leave-time">10:10</div>
+        <div class="leave-from">from home</div>
+        <div class="leave-drive">~40 min via Spit Bridge</div>
+      </div>
+    </div>
+
+    <div class="banner warn">
+      <span>⚠️</span>
+      <div><strong>Two cars, different departure times Saturday morning.</strong> Jackson leaves at 10:10am — Lane Cove is a 40 min drive across the Spit Bridge. Don't underestimate it. Cooper's run to Harbord is short, leave at 10:45.</div>
+    </div>
+
+    <div class="game-card jackson">
+      <div class="kid">Jackson<small>Game 2 of 2</small></div>
+      <div class="info">
+        <div class="team">Harbord Devils</div>
+        <div class="venue"><a href="https://maps.google.com/?q=65+McIntosh+Rd,+Narraweena+NSW+2099" target="_blank">Beverley Job Park, 65 McIntosh Rd, Narraweena</a></div>
+        <div class="kick-line">Arrive 1:40pm &nbsp;·&nbsp; Kickoff <strong>2:30pm</strong></div>
+      </div>
+      <div class="leave-block">
+        <div class="leave-label">Leave by</div>
+        <div class="leave-time">12:55</div>
+        <div class="leave-from">from Riverview</div>
+        <div class="leave-drive">~45 min · allow for traffic</div>
+      </div>
+    </div>
+
+    <div class="banner kit">
+      <span>🎽</span>
+      <div><strong>Kit reminder:</strong> Jackson's Harbord Devils gear travels with you to Riverview. Have it in the car — he'll change between games. Leave Riverview by 12:55 to make the 1:40pm arrival.</div>
+    </div>
+
+    <div class="game-card chloe">
+      <div class="kid">Chloe<small>Game 1 of 2</small></div>
+      <div class="info">
+        <div class="team">Manly Brothers</div>
+        <div class="venue"><a href="https://maps.google.com/?q=Nolan+Reserve,+Pittwater+Rd,+North+Manly+NSW+2100" target="_blank">Nolan's Reserve, Pittwater Rd & Riverview Pde, North Manly</a></div>
+        <div class="kick-line">Arrive 1:00pm &nbsp;·&nbsp; Kickoff <strong>2:00pm</strong></div>
+      </div>
+      <div class="leave-block">
+        <div class="leave-label">Leave by</div>
+        <div class="leave-time">12:45</div>
+        <div class="leave-from">from home</div>
+        <div class="leave-drive">~10 min drive</div>
+      </div>
+    </div>
+
+    <div class="banner warn">
+      <span>⚠️</span>
+      <div><strong>Saturday afternoon parallel runs.</strong> Chloe leaves home at 12:45 (Nolan's Reserve). Jackson's parent leaves Riverview at 12:55 (Beverley Job Park). Different cars, different directions — this is where a third helper is ideal.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUNDAY -->
+<div class="weekend">
+  <div class="day-label">Sunday <em>—</em> 3 games, 3 venues</div>
+  <div class="games">
+
+    <div class="game-card chloe">
+      <div class="kid">Chloe<small>Game 2 of 2</small></div>
+      <div class="info">
+        <div class="team">Seaforth FC</div>
+        <div class="venue"><a href="https://maps.google.com/?q=2+Bareena+Dr,+Balgowlah+Heights+NSW+2093" target="_blank">Tania Park, 2 Bareena Dr, Balgowlah Heights</a></div>
+        <div class="kick-line">Arrive 9:10am &nbsp;·&nbsp; Kickoff <strong>10:00am</strong></div>
+      </div>
+      <div class="leave-block">
+        <div class="leave-label">Leave by</div>
+        <div class="leave-time">8:45</div>
+        <div class="leave-from">from home</div>
+        <div class="leave-drive">~20 min drive</div>
+      </div>
+    </div>
+
+    <div class="game-card cooper">
+      <div class="kid">Cooper<small>Game 2 of 2</small></div>
+      <div class="info">
+        <div class="team">Manly Roos</div>
+        <div class="venue"><a href="https://maps.google.com/?q=277+Pittwater+Rd,+Manly+NSW+2095" target="_blank">Keirle Park, 277 Pittwater Rd, Manly</a></div>
+        <div class="kick-line">Arrive 9:10am &nbsp;·&nbsp; Kickoff <strong>10:00am</strong></div>
+        <div class="kit-reminder">🏉 Toby coaching this game</div>
+      </div>
+      <div class="leave-block">
+        <div class="leave-label">Leave by</div>
+        <div class="leave-time">8:50</div>
+        <div class="leave-from">from home</div>
+        <div class="leave-drive">~15 min drive</div>
+      </div>
+    </div>
+
+    <div class="banner">
+      <span>⚠️</span>
+      <div><strong>Sunday 9:10am clash.</strong> Chloe (Tania Park) is the longer drive — leave at <strong>8:45am</strong>. Cooper (Keirle Park) leaves at <strong>8:50am</strong>. Two cars out the door within 5 minutes of each other.</div>
+    </div>
+
+    <div class="game-card jackson">
+      <div class="kid">Jackson<small>Game 3 of 3</small></div>
+      <div class="info">
+        <div class="team">Manly Saver</div>
+        <div class="venue"><a href="https://maps.google.com/?q=1472+Pittwater+Rd,+Warriewood+NSW+2102" target="_blank">Rat Park (North Narrabeen Reserve), 1472 Pittwater Rd, Warriewood</a></div>
+        <div class="kick-line">Arrive 10:00am &nbsp;·&nbsp; Kickoff <strong>11:00am</strong></div>
+      </div>
+      <div class="leave-block">
+        <div class="leave-label">Leave by</div>
+        <div class="leave-time">9:30</div>
+        <div class="leave-from">from home</div>
+        <div class="leave-drive">~24 min drive north</div>
+      </div>
+    </div>
+
+    <div class="banner">
+      <span>⚠️</span>
+      <div><strong>Third person needed.</strong> Toby is coaching Cooper's game at Keirle Park. Chloe's parent stays at Tania Park. Jackson's 9:30am departure to Rat Park needs a third driver.</div>
+    </div>
+
+  </div>
+</div>
+
+<footer>7 games · 6 venues · 2 days · 3 kids · 🎽 Don't forget the kit bag</footer>
+
+</body>
+</html>
