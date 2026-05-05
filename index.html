@@ -197,13 +197,11 @@
 <body>
 
 <header>
-  <h1>Weekend Game Day</h1>
-  <p>Cooper · Jackson · Chloe</p>
+  <h1 id="title"></h1>
+  <p id="subtitle"></p>
 </header>
 
-<div class="base">
-  🏠 <strong>Base:</strong> 29 Quirk St, Dee Why &nbsp;·&nbsp; Leave times include a 5 min buffer on top of drive time.
-</div>
+<div class="base" id="base"></div>
 
 <div class="legend">
   <div class="legend-item"><div class="dot" style="background:var(--cooper)"></div> Cooper</div>
@@ -213,200 +211,97 @@
   <div class="legend-item"><div class="dot" style="background:var(--family)"></div> All kids</div>
 </div>
 
-<!-- SATURDAY -->
-<div class="weekend">
-  <div class="day-label">Saturday <em>—</em> 5 events · 3 kids</div>
-  <div class="games">
+<div id="schedule"></div>
 
-    <div class="game-card chloe">
-      <div class="kid">Chloe<small>Maths Tutor</small></div>
-      <div class="info">
-        <div class="team">Maths Tutoring</div>
-        <div class="venue"><a href="https://maps.google.com/?q=Rignold+St,+Seaforth+NSW+2092" target="_blank">Rignold St, Seaforth</a> <span style="font-style:italic">(Chloe knows the number)</span></div>
-        <div class="kick-line">8:30am – <strong>9:30am</strong></div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">8:10</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~15 min drive</div>
-      </div>
-    </div>
+<footer id="footer"></footer>
 
-    <div class="game-card cooper">
-      <div class="kid">Cooper<small>Game 1 of 2</small></div>
-      <div class="info">
-        <div class="team">Harbord Devils</div>
-        <div class="venue"><a href="https://maps.google.com/?q=Harbord+Park,+Waratah+St,+Freshwater+NSW" target="_blank">Harbord Park, Waratah St, Freshwater</a></div>
-        <div class="kick-line">Arrive 11:00am &nbsp;·&nbsp; Kickoff <strong>12:00pm</strong></div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">10:45</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~8 min drive</div>
-      </div>
-    </div>
+<script>
+  // Converts **text** to <strong>text</strong>
+  function bold(str) {
+    return str.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  }
 
-    <div class="game-card jackson">
-      <div class="kid">Jackson<small>Game 1 of 2</small></div>
-      <div class="info">
-        <div class="team">Saints at Riverview</div>
-        <div class="venue"><a href="https://maps.google.com/?q=115+Tambourine+Bay+Rd,+Lane+Cove+NSW+2066" target="_blank">St Ignatius College, 115 Tambourine Bay Rd, Lane Cove</a></div>
-        <div class="kick-line">Arrive 11:00am &nbsp;·&nbsp; Kickoff <strong>12:00pm</strong></div>
-        <div class="kit-reminder">🎽 Pack Harbord Devils kit — going straight to next game</div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">10:10</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~40 min via Spit Bridge</div>
-      </div>
-    </div>
+  function renderCard(e) {
+    let kickLine = '';
+    if (e.timeRange) {
+      const parts = e.timeRange.split('–').map(s => s.trim());
+      kickLine = parts.length === 2
+        ? `${parts[0]} – <strong>${parts[1]}</strong>`
+        : e.timeRange;
+    } else {
+      const parts = [];
+      if (e.arrive) parts.push(`Arrive ${e.arrive}`);
+      if (e.start) {
+        const label = e.startLabel || 'Kickoff';
+        parts.push(`${label} <strong>${e.start}</strong>`);
+      }
+      kickLine = parts.join(' &nbsp;·&nbsp; ');
+      if (e.timeNote) kickLine += ` &nbsp;·&nbsp; ${e.timeNote}`;
+    }
 
-    <div class="banner warn">
-      <span>⚠️</span>
-      <div><strong>Two cars, different departure times Saturday morning.</strong> Jackson leaves at 10:10am — Lane Cove is a 40 min drive across the Spit Bridge. Don't underestimate it. Cooper's run to Harbord is short, leave at 10:45.</div>
-    </div>
+    const venueInner = e.venueUrl
+      ? `<a href="${e.venueUrl}" target="_blank">${e.venue}</a>`
+      : e.venue;
+    const venueNote = e.venueNote
+      ? ` <span style="font-style:italic">(${e.venueNote})</span>`
+      : '';
+    const badge = e.badge
+      ? `<div class="kit-reminder">${e.badge}</div>`
+      : '';
 
-    <div class="game-card jackson">
-      <div class="kid">Jackson<small>Game 2 of 2</small></div>
-      <div class="info">
-        <div class="team">Harbord Devils</div>
-        <div class="venue"><a href="https://maps.google.com/?q=65+McIntosh+Rd,+Narraweena+NSW+2099" target="_blank">Beverley Job Park, 65 McIntosh Rd, Narraweena</a></div>
-        <div class="kick-line">Arrive 1:40pm &nbsp;·&nbsp; Kickoff <strong>2:30pm</strong></div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">12:55</div>
-        <div class="leave-from">from Riverview</div>
-        <div class="leave-drive">~45 min · allow for traffic</div>
-      </div>
-    </div>
+    return `
+      <div class="game-card ${e.color}">
+        <div class="kid">${e.kid}<small>${e.kidNote}</small></div>
+        <div class="info">
+          <div class="team">${e.team}</div>
+          <div class="venue">${venueInner}${venueNote}</div>
+          <div class="kick-line">${kickLine}</div>
+          ${badge}
+        </div>
+        <div class="leave-block">
+          <div class="leave-label">Leave by</div>
+          <div class="leave-time">${e.leaveTime}</div>
+          <div class="leave-from">${e.leaveFrom}</div>
+          <div class="leave-drive">${e.drive}</div>
+        </div>
+      </div>`;
+  }
 
-    <div class="banner kit">
-      <span>🎽</span>
-      <div><strong>Kit reminder:</strong> Jackson's Harbord Devils gear travels with you to Riverview. Have it in the car — he'll change between games. Leave Riverview by 12:55 to make the 1:40pm arrival.</div>
-    </div>
+  function renderBanner(e) {
+    return `
+      <div class="banner ${e.style || ''}">
+        <span>${e.icon}</span>
+        <div><strong>${e.strong}</strong> ${bold(e.text)}</div>
+      </div>`;
+  }
 
-    <div class="game-card chloe">
-      <div class="kid">Chloe<small>Game 1 of 2</small></div>
-      <div class="info">
-        <div class="team">Manly Brothers</div>
-        <div class="venue"><a href="https://maps.google.com/?q=Nolan+Reserve,+Pittwater+Rd,+North+Manly+NSW+2100" target="_blank">Nolan's Reserve, Pittwater Rd & Riverview Pde, North Manly</a></div>
-        <div class="kick-line">Arrive 1:00pm &nbsp;·&nbsp; Kickoff <strong>2:00pm</strong></div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">12:45</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~10 min drive</div>
-      </div>
-    </div>
+  async function render() {
+    const data = await fetch('schedule.json').then(r => r.json());
 
-    <div class="banner warn">
-      <span>⚠️</span>
-      <div><strong>Saturday afternoon parallel runs.</strong> Chloe leaves home at 12:45 (Nolan's Reserve). Jackson's parent leaves Riverview at 12:55 (Beverley Job Park). Different cars, different directions — this is where a third helper is ideal.</div>
-    </div>
+    document.getElementById('title').textContent = data.title;
+    document.getElementById('subtitle').textContent = data.subtitle;
+    document.getElementById('base').innerHTML =
+      `🏠 <strong>Base:</strong> ${data.base} &nbsp;·&nbsp; ${data.baseNote}`;
+    document.getElementById('footer').textContent = data.footer;
 
-  </div>
-</div>
+    const schedule = document.getElementById('schedule');
+    for (const day of data.days) {
+      const eventsHtml = day.events.map(e =>
+        e.type === 'card' ? renderCard(e) :
+        e.type === 'banner' ? renderBanner(e) : ''
+      ).join('\n');
 
-<!-- SUNDAY -->
-<div class="weekend">
-  <div class="day-label">Sunday <em>—</em> 5 events · 3 kids</div>
-  <div class="games">
+      const section = document.createElement('div');
+      section.className = 'weekend';
+      section.innerHTML = `
+        <div class="day-label">${day.name} <em>—</em> ${day.label}</div>
+        <div class="games">${eventsHtml}</div>`;
+      schedule.appendChild(section);
+    }
+  }
 
-    <div class="game-card chloe">
-      <div class="kid">Chloe<small>Game 2 of 2</small></div>
-      <div class="info">
-        <div class="team">Seaforth FC</div>
-        <div class="venue"><a href="https://maps.google.com/?q=2+Bareena+Dr,+Balgowlah+Heights+NSW+2093" target="_blank">Tania Park, 2 Bareena Dr, Balgowlah Heights</a></div>
-        <div class="kick-line">Arrive 9:10am &nbsp;·&nbsp; Kickoff <strong>10:00am</strong></div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">8:45</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~20 min drive</div>
-      </div>
-    </div>
-
-    <div class="game-card cooper">
-      <div class="kid">Cooper<small>Game 2 of 2</small></div>
-      <div class="info">
-        <div class="team">Manly Roos</div>
-        <div class="venue"><a href="https://maps.google.com/?q=277+Pittwater+Rd,+Manly+NSW+2095" target="_blank">Keirle Park, 277 Pittwater Rd, Manly</a></div>
-        <div class="kick-line">Arrive 9:10am &nbsp;·&nbsp; Kickoff <strong>10:00am</strong></div>
-        <div class="kit-reminder">🏉 Toby coaching this game</div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">8:50</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~15 min drive</div>
-      </div>
-    </div>
-
-    <div class="banner">
-      <span>⚠️</span>
-      <div><strong>Sunday 9:10am clash.</strong> Chloe (Tania Park) is the longer drive — leave at <strong>8:45am</strong>. Cooper (Keirle Park) leaves at <strong>8:50am</strong>. Two cars out the door within 5 minutes of each other.</div>
-    </div>
-
-    <div class="game-card jackson">
-      <div class="kid">Jackson<small>Game 3 of 3</small></div>
-      <div class="info">
-        <div class="team">Manly Savers</div>
-        <div class="venue"><a href="https://maps.google.com/?q=1472+Pittwater+Rd,+Warriewood+NSW+2102" target="_blank">Rat Park (North Narrabeen Reserve), 1472 Pittwater Rd, Warriewood</a></div>
-        <div class="kick-line">Arrive 10:00am &nbsp;·&nbsp; Kickoff <strong>11:00am</strong></div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">9:30</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~24 min drive north</div>
-      </div>
-    </div>
-
-    <div class="banner">
-      <span>⚠️</span>
-      <div><strong>Third person needed.</strong> Toby is coaching Cooper's game at Keirle Park. Chloe's parent stays at Tania Park. Jackson's 9:30am departure to Rat Park needs a third driver.</div>
-    </div>
-
-    <div class="game-card family">
-      <div class="kid">All Kids<small>Church</small></div>
-      <div class="info">
-        <div class="team">Tongan Church</div>
-        <div class="venue">Dee Why</div>
-        <div class="kick-line">From <strong>12:30pm</strong> · Stay as long as needed</div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">12:20</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~5 min</div>
-      </div>
-    </div>
-
-    <div class="game-card cooper">
-      <div class="kid">Cooper<small>Trial</small></div>
-      <div class="info">
-        <div class="team">Marlins Trial</div>
-        <div class="venue"><a href="https://maps.google.com/?q=Allambie+Oval,+Allambie+Heights+NSW+2100" target="_blank">Allambie Oval, Allambie Heights</a></div>
-        <div class="kick-line">Arrive 2:30pm &nbsp;·&nbsp; Start <strong>3:00pm</strong></div>
-      </div>
-      <div class="leave-block">
-        <div class="leave-label">Leave by</div>
-        <div class="leave-time">2:05</div>
-        <div class="leave-from">from home</div>
-        <div class="leave-drive">~20 min drive</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<footer>10 events · 7 venues · 2 days · 3 kids · 🎽 Don't forget the kit bag</footer>
+  render();
+</script>
 
 </body>
 </html>
